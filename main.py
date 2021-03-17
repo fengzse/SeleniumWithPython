@@ -1,12 +1,13 @@
-from time import sleep
-
 from selenium import webdriver
-from selenium.webdriver.support import wait
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 
 
 class TestSelenium:
     def __init__(self, url_insert):
-        # Start up
+        # SetUp
         self.driver = webdriver.Chrome()
         self.url = url_insert
         self.driver.get(self.url)
@@ -23,7 +24,7 @@ class TestSelenium:
         self.search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
         self.search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
         """
-        # Element locating
+        # Element locator
         for i in search_items:
             self.search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
             self.search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
@@ -40,10 +41,46 @@ class TestSelenium:
             self.driver.back()
             # self.search_bar.clear()
 
+    def mouse_operation(self, search_item):
+        self.search_bar = self.driver.find_element(By.XPATH, "//input[@id='twotabsearchtextbox']")
+        self.search = self.search_bar.send_keys(search_item)
+        self.search_bar.submit()
+
+        try:
+            WebDriverWait(self.driver, 10).until(
+                ec.presence_of_element_located((By.PARTIAL_LINK_TEXT, "The Complete Reference")))
+        except TimeoutError:
+            print('Time out')
+            self.driver.quit()
+
+        element_link = self.driver.find_element(By.PARTIAL_LINK_TEXT, "The Complete Reference")
+        ActionChains(self.driver).move_to_element(element_link).perform()
+        WebDriverWait(self.driver, 5)
+        ActionChains(self.driver).click().perform()
+
+        try:
+            WebDriverWait(self.driver, 10).until(
+                ec.presence_of_element_located((By.XPATH, "//*[@id='add-to-cart-button']")))
+        except TimeoutError:
+            print('Time out')
+            self.driver.quit()
+
+        element_button = self.driver.find_element(By.XPATH, "//*[@id='add-to-cart-button']")
+        ActionChains(self.driver).move_to_element(element_button).perform()
+        ActionChains(self.driver).click().perform()
+        try:
+            WebDriverWait(self.driver, 5).until(
+                ec.text_to_be_present_in_element((By.XPATH, "//*[@id='huc-v2-order-row-confirm-text']/h1"),
+                                                 "Added to Cart"))
+            print('Ready to buy')
+        except TimeoutError:
+            print('Time out')
+            self.driver.quit()
+
     # def set_windows(self):
     # self.driver.set_window_size(480,800)
     # self.driver.maximize_window()
 
     # break
-    def break_connection(self):
+    def tearDown(self):
         self.driver.quit()

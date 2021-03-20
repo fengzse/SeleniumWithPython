@@ -1,14 +1,16 @@
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 
 class TestSelenium:
-    def __init__(self, url_insert):
+    def __init__(self, driver, url_insert):
         # SetUp
-        self.driver = webdriver.Chrome()
+        self.driver = driver
         self.url = url_insert
         self.driver.get(self.url)
         self.search_bar = None
@@ -16,11 +18,15 @@ class TestSelenium:
         self.search = None
 
     def __repr__(self):
-        return 'Now accessing to %s' % self.url
+        return "Now accessing to %s" % self.url
 
-    def func(self, *search_items):
+    # def set_windows(self):
+    # self.driver.set_window_size(480,800)
+    # self.driver.maximize_window()
+
+    def keyboard_locator(self, *search_items):
         """
-        Can not assign element-locating to vars and reuse them in the loop, have to re-locate in the loop
+        Can not assign element-locator to vars and reuse them in the loop, have to re-locate in the loop
         self.search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
         self.search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
         """
@@ -73,14 +79,22 @@ class TestSelenium:
                 ec.text_to_be_present_in_element((By.XPATH, "//*[@id='huc-v2-order-row-confirm-text']/h1"),
                                                  "Added to Cart"))
             print('Ready to buy')
-        except TimeoutError:
+        except NoSuchElementException:
             print('Time out')
             self.driver.quit()
 
-    # def set_windows(self):
-    # self.driver.set_window_size(480,800)
-    # self.driver.maximize_window()
+    def mutiple_locators(self, search_item):
+        self.search_bar = self.driver.find_element(By.CSS_SELECTOR, "body > div.L3eUgb > div.o3j99.ikrT4e.om7nvf > "
+                                                                    "form > div:nth-child(1) > div.A8SBwf > "
+                                                                    "div.RNNXgb > div > div.a4bIc > input")
+        self.search_bar.send_keys(search_item)
+        self.search_bar.submit()
+
+        search_results = self.driver.find_elements(By.CLASS_NAME, "FozYP")
+        print(len(search_results))
+        for i in search_results:
+            print(i.text)
 
     # break
-    def tearDown(self):
+    def tear_down(self):
         self.driver.quit()

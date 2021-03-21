@@ -1,4 +1,3 @@
-from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
@@ -16,6 +15,8 @@ class TestSelenium:
         self.search_bar = None
         self.search_button = None
         self.search = None
+        self.video = None
+        self.video_src = None
 
     def __repr__(self):
         return "Now accessing to %s" % self.url
@@ -94,6 +95,19 @@ class TestSelenium:
         print(len(search_results))
         for i in search_results:
             print(i.text)
+
+    def video_play(self):
+        self.video = self.driver.find_element(By.XPATH, "//*[@id='vjs_video_3_html5_api']")
+
+        self.video_src = self.driver.execute_script("return arguments[0].currentSrc;", self.video)
+
+        try:
+            print("Strat playing" + self.video_src)
+            self.driver.execute_script("arguments[0].play()", self.video)
+        except:
+            print("Video not found")
+        else:
+            print("Video can be played")
 
     # break
     def tear_down(self):

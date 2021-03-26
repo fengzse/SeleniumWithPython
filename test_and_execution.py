@@ -4,10 +4,12 @@ from main import TestSelenium
 from selenium import webdriver
 
 driver = webdriver.Chrome()
+amazon_url = "http://www.amazon.com"
+url_google = "http://www.google.com"
+url_video = "https://videojs.com/"
 
 
 def amazon_search(choice):
-    amazon_url = "http://www.amazon.com"
     amazon = TestSelenium(driver, amazon_url)
     print(amazon)
     if choice == 1:
@@ -20,8 +22,7 @@ def amazon_search(choice):
 
 
 def google_search():
-    url = "http://www.google.com"
-    google = TestSelenium(driver, url)
+    google = TestSelenium(driver, url_google)
     print(google)
 
     google.mutiple_locators("selenium book")
@@ -29,12 +30,19 @@ def google_search():
 
 
 def video_play():
-    url = "https://videojs.com/"
-    play_video = TestSelenium(driver, url)
+    play_video = TestSelenium(driver, url_video)
     print(play_video)
     play_video.video_play()
     sleep(20)
     play_video.tear_down()
 
 
-video_play()
+def scroll_up_down():
+    scroll_test = TestSelenium(driver,amazon_url)
+    print(scroll_test)
+    scroll_test.scroll_up_down_amazon(amazon_url)
+    sleep(10)
+    scroll_test.tear_down()
+
+
+scroll_up_down()

@@ -1,5 +1,6 @@
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains, TouchActions
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from selenium.webdriver.support.wait import WebDriverWait
@@ -7,16 +8,11 @@ from selenium.webdriver.support import expected_conditions as ec
 
 
 class TestSelenium:
-    def __init__(self, driver, url_insert):
+    def __init__(self, driver=None, url_insert=None):
         # SetUp
         self.driver = driver
         self.url = url_insert
         self.driver.get(self.url)
-        self.search_bar = None
-        self.search_button = None
-        self.search = None
-        self.video = None
-        self.video_src = None
 
     def __repr__(self):
         return "Now accessing to %s" % self.url
@@ -28,30 +24,30 @@ class TestSelenium:
     def keyboard_locator(self, *search_items):
         """
         Can not assign element-locator to vars and reuse them in the loop, have to re-locate in the loop
-        self.search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
-        self.search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
+        search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
+        search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
         """
         # Element locator
         for i in search_items:
-            self.search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
-            self.search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
-            self.search_bar.send_keys(i)
+            search_bar = self.driver.find_element_by_xpath("//input[@id='twotabsearchtextbox']")
+            search_button = self.driver.find_element_by_xpath("//*[@id='nav-search-submit-button']")
+            search_bar.send_keys(i)
             '''
             used to code 
-                self.search=self.search_bar.send_keys(i)
-                self.search.submit() -->  couldn't work
+                search=self.search_bar.send_keys(i)
+                search.submit() -->  couldn't work
             correct way
-                self.search_bar.submit() --> works
+                search_bar.submit() --> works
             '''
-            self.search_button.click()
+            search_button.click()
             print('Found %s items on Amazon' % i)
             self.driver.back()
-            # self.search_bar.clear()
+            # search_bar.clear()
 
     def mouse_operation(self, search_item):
-        self.search_bar = self.driver.find_element(By.XPATH, "//input[@id='twotabsearchtextbox']")
-        self.search = self.search_bar.send_keys(search_item)
-        self.search_bar.submit()
+        search_bar = self.driver.find_element(By.XPATH, "//input[@id='twotabsearchtextbox']")
+        search_bar.send_keys(search_item)
+        search_bar.submit()
 
         try:
             WebDriverWait(self.driver, 10).until(
@@ -85,11 +81,11 @@ class TestSelenium:
             self.driver.quit()
 
     def mutiple_locators(self, search_item):
-        self.search_bar = self.driver.find_element(By.CSS_SELECTOR, "body > div.L3eUgb > div.o3j99.ikrT4e.om7nvf > "
-                                                                    "form > div:nth-child(1) > div.A8SBwf > "
-                                                                    "div.RNNXgb > div > div.a4bIc > input")
-        self.search_bar.send_keys(search_item)
-        self.search_bar.submit()
+        search_bar = self.driver.find_element(By.CSS_SELECTOR, "body > div.L3eUgb > div.o3j99.ikrT4e.om7nvf > "
+                                                               "form > div:nth-child(1) > div.A8SBwf > "
+                                                               "div.RNNXgb > div > div.a4bIc > input")
+        search_bar.send_keys(search_item)
+        search_bar.submit()
 
         search_results = self.driver.find_elements(By.CLASS_NAME, "FozYP")
         print(len(search_results))
@@ -97,17 +93,38 @@ class TestSelenium:
             print(i.text)
 
     def video_play(self):
-        self.video = self.driver.find_element(By.XPATH, "//*[@id='vjs_video_3_html5_api']")
+        video = self.driver.find_element(By.XPATH, "//*[@id='vjs_video_3_html5_api']")
 
-        self.video_src = self.driver.execute_script("return arguments[0].currentSrc;", self.video)
+        video_src = self.driver.execute_script("return arguments[0].currentSrc;", video)
 
         try:
-            print("Strat playing" + self.video_src)
-            self.driver.execute_script("arguments[0].play()", self.video)
+            print("Strat playing" + video_src)
+            self.driver.execute_script("arguments[0].play()", video)
         except:
             print("Video not found")
         else:
             print("Video can be played")
+
+    def scroll_up_down_amazon(self, url):
+        option = webdriver.ChromeOptions()
+        option.add_experimental_option('w3c', False)
+        self.driver = webdriver.Chrome(options=option)
+        self.driver.get(url)
+        self.driver.maximize_window()
+
+        search_bar = self.driver.find_element(By.XPATH, "//*[@id='twotabsearchtextbox']")
+        search_bar.send_keys("selenium book")
+        search_bar.submit()
+
+        start = self.driver.find_element(By.XPATH, "//*[@id='search']/span/div/span/h1/div/div[1]/div/div")
+        action = TouchActions(self.driver)
+        try:
+            action.tap(start)
+            action.scroll_from_element(start, 0, 500).perform()
+        except:
+            print("Fail to scroll")
+        else:
+            print("Succeed")
 
     # break
     def tear_down(self):

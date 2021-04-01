@@ -44,31 +44,34 @@ class TestSelenium:
             self.driver.back()
             # search_bar.clear()
 
-    def mouse_operation(self, search_item):
+    def mouse_operation(self, search_item, key_words):
         search_bar = self.driver.find_element(By.XPATH, "//input[@id='twotabsearchtextbox']")
         search_bar.send_keys(search_item)
         search_bar.submit()
 
+        if key_words!='':
+            try:
+                WebDriverWait(self.driver, 10).until(
+                    ec.presence_of_element_located((By.PARTIAL_LINK_TEXT, key_words)))
+            except TimeoutError:
+                print('Time out')
+                self.driver.quit()
+
+            element_link = self.driver.find_element(By.PARTIAL_LINK_TEXT, key_words)
+            ActionChains(self.driver).move_to_element(element_link).perform()
+            WebDriverWait(self.driver, 5)
+            ActionChains(self.driver).click().perform()
+        else:
+            self.driver.quit()
+
         try:
             WebDriverWait(self.driver, 10).until(
-                ec.presence_of_element_located((By.PARTIAL_LINK_TEXT, "The Complete Reference")))
+                ec.presence_of_element_located((By.XPATH, "// *[@id = 'rentButton']")))
         except TimeoutError:
             print('Time out')
             self.driver.quit()
 
-        element_link = self.driver.find_element(By.PARTIAL_LINK_TEXT, "The Complete Reference")
-        ActionChains(self.driver).move_to_element(element_link).perform()
-        WebDriverWait(self.driver, 5)
-        ActionChains(self.driver).click().perform()
-
-        try:
-            WebDriverWait(self.driver, 10).until(
-                ec.presence_of_element_located((By.XPATH, "//*[@id='add-to-cart-button']")))
-        except TimeoutError:
-            print('Time out')
-            self.driver.quit()
-
-        element_button = self.driver.find_element(By.XPATH, "//*[@id='add-to-cart-button']")
+        element_button = self.driver.find_element(By.XPATH, "// *[@id = 'rentButton']")
         ActionChains(self.driver).move_to_element(element_button).perform()
         ActionChains(self.driver).click().perform()
         try:
@@ -126,6 +129,4 @@ class TestSelenium:
         else:
             print("Succeed")
 
-    # break
-    def tear_down(self):
-        self.driver.quit()
+
